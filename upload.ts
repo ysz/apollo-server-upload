@@ -8,15 +8,19 @@ const typeDefs = gql`
   type Query {
     hello: String
   }
+  type File {
+    id: String!
+  }
   type Mutation {
-    upload(file: Upload!): String!
+    singleUpload(file: Upload!): File
   }
 `;
 const resolvers = {
   Upload: GraphQLUpload,
   Mutation: {
-    upload: async (parent: any, { file }: { file: any }, context) => {
+    singleUpload: async (parent: any, { file }: { file: any }, context) => {
       console.log("upload");
+      return { id: "foo" };
 
       const { createReadStream } = await file;
       console.log(file);
@@ -33,7 +37,14 @@ const server = new ApolloServer({
     maxFiles: 20
   },
   typeDefs,
-  resolvers
+  resolvers,
+  formatError: (err: any) => {
+    console.log(err);
+
+    // Otherwise return the original error.  The error can also
+    // be manipulated in other ways, so long as it's returned.
+    return err;
+  }
 });
 app.use(
   /*'/foo/graphql',*/
